@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>the BlueBright Tv - Home</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1 class="logo">the BlueBright Tv</h1>
+        <nav>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="news.html">News</a></li>
+                <li><a href="videos.html">Videos</a></li>
+            </ul>
+            <div class="auth-buttons"></div>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Hero Section -->
+        <section class="hero">
+            <h1>Welcome to the BlueBright Tv</h1>
+            <p>Your premium destination for exclusive shows, live events, and breaking news</p>
+            <button onclick="window.location.href='auth.html'" style="margin-top: 20px;">Get Started</button>
+        </section>
+
+        <!-- About Section -->
+        <section>
+            <h2>About Us</h2>
+            <p>The BlueBright Tv is your go-to source for the latest in entertainment, news, and technology. We bring you the best content from around the world with stunning visuals and compelling storytelling.</p>
+        </section>
+
+        <!-- Latest News -->
+        <section>
+            <h2>Latest News & Articles</h2>
+            <div class="articles-grid">
+                <div class="news-card" onclick="viewArticle('New Show Launch', 'We are excited to announce the launch of our new show, Tech Tomorrow, which will explore the latest advancements in technology and innovation. Join us as we dive into the future!', 'images/news1.jpg')">
+                    <img src="images/news1.jpg" alt="New Show Launch" class="card-image">
+                    <div class="card-content">
+                        <h3>New Show Launch</h3>
+                        <p>Discover our exciting new show exploring the latest tech advancements</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Featured Videos -->
+        <section>
+            <h2>Featured Videos</h2>
+            <div class="videos-grid">
+                <div class="video-card" onclick="viewArticle('Canva for Beginners', 'Learn the basics of Canva design tool with our comprehensive tutorial. Perfect for beginners looking to create stunning visuals!', 'images and videos/images (4).jpg')">
+                    <img src="images and videos/images (4).jpg" alt="Canva Tutorial" class="card-image">
+                    <div class="card-content">
+                        <h3>Canva for Beginners</h3>
+                        <p>Learn to create stunning designs with Canva</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Newsletter Section -->
+        <section style="background: var(--card-dark); padding: 40px; border-radius: 10px; border: 2px solid #ffc107;">
+            <h2 style="text-align: center;">Subscribe to Our Newsletter</h2>
+            <p style="text-align: center; margin-bottom: 20px;">Get updates on new shows, exclusive content, and special offers</p>
+            <form onsubmit="handleNewsletterSignup(event)" style="max-width: 500px;">
+                <input type="email" placeholder="Enter your email" required style="margin-bottom: 10px;">
+                <button type="submit">Subscribe</button>
+            </form>
+        </section>
+
+        <!-- Contact Section -->
+        <section>
+            <h2>Contact Us</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                <div style="background: var(--card-dark); padding: 20px; border-radius: 10px; border: 2px solid #ffc107;">
+                    <h3 style="color: #ffc107;">WhatsApp</h3>
+                    <p>+94 757 733 146</p>
+                </div>
+                <div style="background: var(--card-dark); padding: 20px; border-radius: 10px; border: 2px solid #ffc107;">
+                    <h3 style="color: #ffc107;">Email</h3>
+                    <p>thebluebrighttv@gmail.com</p>
+                </div>
+                <div style="background: var(--card-dark); padding: 20px; border-radius: 10px; border: 2px solid #ffc107;">
+                    <h3 style="color: #ffc107;">Follow Us</h3>
+                    <p>Facebook | Instagram | Twitter</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Notification -->
+    <div id="notification" class="notification" style="display: none;"></div>
+
+    <footer>
+        <p>&copy; 2025 the BlueBright Tv. All rights reserved.</p>
+    </footer>
+
+    <script src="app.js"></script>
+    <script>
+        function handleNewsletterSignup(e) {
+            e.preventDefault();
+            const email = e.target.querySelector('input[type="email"]').value;
+            showNotification(`Newsletter subscription confirmation sent to ${email}`, 'success');
+            e.target.reset();
+        }
+    </script>
+</body>
+</html>

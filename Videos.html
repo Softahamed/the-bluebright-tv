@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>the BlueBright Tv - Videos</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1 class="logo">the BlueBright Tv</h1>
+        <nav>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="news.html">News</a></li>
+                <li><a href="videos.html">Videos</a></li>
+            </ul>
+            <div class="auth-buttons"></div>
+        </nav>
+    </header>
+
+    <main>
+        <section>
+            <h2>Featured Videos & Tutorials</h2>
+            <div class="videos-grid">
+                <div class="video-card" onclick="viewArticle('Canva for Beginners', 'Learn the basics of Canva design tool with our comprehensive tutorial. Perfect for beginners looking to create stunning visuals without any design experience. We cover all the essentials!', 'images and videos/images (4).jpg')">
+                    <img src="images and videos/images (4).jpg" alt="Video Image 1" class="card-image">
+                    <div class="card-content">
+                        <h3>Canva for Beginners</h3>
+                        <p>Complete guide to creating stunning designs with Canva</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div id="notification" class="notification" style="display: none;"></div>
+
+    <footer>
+        <p>&copy; 2025 the BlueBright Tv. All rights reserved.</p>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>

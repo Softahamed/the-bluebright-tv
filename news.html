@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>the BlueBright Tv - News</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1 class="logo">the BlueBright Tv</h1>
+        <nav>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="news.html">News</a></li>
+                <li><a href="videos.html">Videos</a></li>
+            </ul>
+            <div class="auth-buttons"></div>
+        </nav>
+    </header>
+
+    <main>
+        <section>
+            <h2>Breaking News & Updates</h2>
+            <div class="articles-grid">
+                <div class="news-card" onclick="viewArticle('New Show Launch', 'We are excited to announce the launch of our new show, Tech Tomorrow, which will explore the latest advancements in technology. This groundbreaking series will feature industry experts and innovative discussions.', 'images/news1.jpg')">
+                    <img src="images/news1.jpg" alt="News Image 1" class="card-image">
+                    <div class="card-content">
+                        <h3>New Show Launch</h3>
+                        <p>Exciting new show exploring the latest tech advancements and innovations</p>
+                    </div>
+                </div>
+
+                <div class="news-card" onclick="viewArticle('Community Outreach Program', 'The BlueBright Tv is proud to launch a new community outreach program aimed at supporting local artists and creators. We believe in giving back to the community that supports us.', 'images/news2.jpg')">
+                    <img src="images/news2.jpg" alt="News Image 2" class="card-image">
+                    <div class="card-content">
+                        <h3>Community Outreach Program</h3>
+                        <p>Supporting local artists and creators in our community</p>
+                    </div>
+                </div>
+
+                <div class="news-card" onclick="viewArticle('Award Recognition', 'The BlueBright Tv has been recognized with multiple awards for excellence in entertainment and journalism. Thank you for your continued support!', 'images/news3.jpg')">
+                    <img src="images/news3.jpg" alt="Award" class="card-image">
+                    <div class="card-content">
+                        <h3>Award Recognition</h3>
+                        <p>BlueBright Tv wins multiple awards for excellence</p>
+                    </div>
+                </div>
+
+                <div class="news-card" onclick="viewArticle('Studio Expansion', 'We are expanding our studios to bring you even better quality content. New state-of-the-art equipment is being installed this month.', 'images/news4.jpg')">
+                    <img src="images/news4.jpg" alt="Studio" class="card-image">
+                    <div class="card-content">
+                        <h3>Studio Expansion</h3>
+                        <p>New studios with state-of-the-art technology</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div id="notification" class="notification" style="display: none;"></div>
+
+    <footer>
+        <p>&copy; 2025 the BlueBright Tv. All rights reserved.</p>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlueBright Tv - Admin Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1 class="logo">BlueBright Tv Admin</h1>
+        <nav>
+            <div class="auth-buttons"></div>
+        </nav>
+    </header>
+
+    <main>
+        <div class="admin-container">
+            <h2 style="color: #ffc107; margin-bottom: 30px; font-size: 32px;">Admin Dashboard</h2>
+
+            <!-- Stats Section -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>Total Users</h3>
+                    <div class="number" id="totalUsers">0</div>
+                    <p style="color: #b0b5c0;">Registered members</p>
+                </div>
+
+                <div class="stat-card">
+                    <h3>Total Articles</h3>
+                    <div class="number" id="totalArticles">12</div>
+                    <p style="color: #b0b5c0;">News & stories</p>
+                </div>
+
+                <div class="stat-card">
+                    <h3>Total Videos</h3>
+                    <div class="number" id="totalVideos">8</div>
+                    <p style="color: #b0b5c0;">Uploaded videos</p>
+                </div>
+
+                <div class="stat-card">
+                    <h3>Updates Sent</h3>
+                    <div class="number" id="totalUpdates">0</div>
+                    <p style="color: #b0b5c0;">Notifications</p>
+                </div>
+            </div>
+
+            <!-- Users Management -->
+            <section style="margin-top: 50px;">
+                <h3 style="color: #ffc107; margin-bottom: 20px;">Registered Users</h3>
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>Registered Date</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersTableBody">
+                        <!-- Will be populated by JS -->
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- Send Update/Notification -->
+            <section style="margin-top: 50px; background: var(--card-dark); padding: 30px; border-radius: 10px; border: 2px solid #ffc107;">
+                <h3 style="color: #ffc107; margin-bottom: 20px;">Send Update to Users</h3>
+                <form onsubmit="sendUpdate(event)">
+                    <textarea placeholder="Enter your update message..." required style="min-height: 100px; padding: 12px; border: 2px solid #ffc107; border-radius: 8px; background: rgba(255, 193, 7, 0.1); color: #fff; font-size: 14px; resize: vertical;"></textarea>
+                    <select required style="padding: 12px; border: 2px solid #ffc107; border-radius: 8px; background: rgba(255, 193, 7, 0.1); color: #fff; margin: 10px 0; width: 100%;">
+                        <option value="">-- Select Update Type --</option>
+                        <option value="🔴 Breaking News:">Breaking News</option>
+                        <option value="🎥 New Video:">New Video</option>
+                        <option value="📰 New Article:">New Article</option>
+                        <option value="✨ Feature Update:">Feature Update</option>
+                        <option value="🎉 Special Event:">Special Event</option>
+                    </select>
+                    <button type="submit" style="width: 100%; margin-top: 10px;">Send Notification</button>
+                </form>
+            </section>
+
+            <!-- Logout -->
+            <div style="text-align: center; margin-top: 40px;">
+                <button onclick="adminLogout()" style="background: #ef4444; color: white; padding: 12px 30px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 16px;">Logout from Admin</button>
+            </div>
+        </div>
+    </main>
+
+    <div id="notification" class="notification" style="display: none;"></div>
+
+    <footer>
+        <p>&copy; 2025 the BlueBright Tv Admin Panel. All rights reserved.</p>
+    </footer>
+
+    <!-- Firebase SDKs (loaded before app.js to ensure initialization) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="app.js"></script>
+    <script>
+        // Initialize admin dashboard
+        document.addEventListener('DOMContentLoaded', () => {
+            checkAdminAccess();
+            loadAdminStats();
+            displayUsers();
+        });
+
+        function checkAdminAccess() {
+            const adminPassword = localStorage.getItem('adminPassword');
+            if (!adminPassword) {
+                const password = prompt('Enter admin password:');
+                if (password === 'admin123') {
+                    localStorage.setItem('adminPassword', 'authenticated');
+                } else {
+                    alert('Access Denied');
+                    window.location.href = 'auth.html';
+                }
+            }
+        }
+
+        function loadAdminStats() {
+            const totalUsersEl = document.getElementById('totalUsers');
+            const totalUpdatesEl = document.getElementById('totalUpdates');
+
+            if (typeof USE_FIREBASE !== 'undefined' && USE_FIREBASE && window.firebase) {
+                // remote counts
+                getUserCount().then(count => { totalUsersEl.textContent = count; }).catch(() => { totalUsersEl.textContent = '—'; });
+                firebase.database().ref('updates').once('value').then(snap => {
+                    const val = snap.val() || {};
+                    totalUpdatesEl.textContent = Object.keys(val).length;
+                }).catch(() => { totalUpdatesEl.textContent = '—'; });
+                return;
+            }
+
+            const users = JSON.parse(localStorage.getItem('users')) || [];
+            const updates = JSON.parse(localStorage.getItem('updates')) || [];
+            document.getElementById('totalUsers').textContent = users.length;
+            document.getElementById('totalUpdates').textContent = updates.length;
+        }
+
+        function displayUsers() {
+            const tbody = document.getElementById('usersTableBody');
+
+            if (typeof USE_FIREBASE !== 'undefined' && USE_FIREBASE && window.firebase) {
+                fetchUsers().then(users => {
+                    if (!users || users.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #b0b5c0;">No users registered yet</td></tr>';
+                        return;
+                    }
+                    tbody.innerHTML = users.map(user => `
+                        <tr>
+                            <td>${user.id}</td>
+                            <td>${user.username}</td>
+                            <td>${user.email}</td>
+                            <td>${user.registeredDate}</td>
+                            <td>
+                                <button onclick="deleteUser('${user.id}')" style="background: #ef4444; color: white; padding: 5px 10px; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">Delete</button>
+                            </td>
+                        </tr>
+                    `).join('');
+                }).catch(err => {
+                    console.error('Error fetching users:', err);
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #b0b5c0;">Unable to load users</td></tr>';
+                });
+                return;
+            }
+
+            const users = JSON.parse(localStorage.getItem('users')) || [];
+            if (users.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #b0b5c0;">No users registered yet</td></tr>';
+                return;
+            }
+            tbody.innerHTML = users.map(user => `
+                <tr>
+                    <td>${user.id}</td>
+                    <td>${user.username}</td>
+                    <td>${user.email}</td>
+                    <td>${user.registeredDate}</td>
+                    <td>
+                        <button onclick="deleteUser('${user.id}')" style="background: #ef4444; color: white; padding: 5px 10px; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">Delete</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function deleteUser(userId) {
+            if (!confirm('Are you sure you want to delete this user?')) return;
+
+            if (typeof USE_FIREBASE !== 'undefined' && USE_FIREBASE && window.firebase) {
+                firebase.database().ref('users/' + userId).remove().then(() => {
+                    showNotification('User deleted successfully', 'success');
+                    displayUsers();
+                    loadAdminStats();
+                }).catch(err => {
+                    console.error('Error deleting user:', err);
+                    showNotification('Failed to delete user', 'error');
+                });
+                return;
+            }
+
+            let users = JSON.parse(localStorage.getItem('users')) || [];
+            users = users.filter(u => u.id != userId);
+            localStorage.setItem('users', JSON.stringify(users));
+            displayUsers();
+            loadAdminStats();
+            showNotification('User deleted successfully', 'success');
+        }
+
+        function sendUpdate(event) {
+            event.preventDefault();
+            const form = event.target;
+            const message = form.querySelector('textarea').value;
+            const type = form.querySelector('select').value;
+
+            addUpdate(type + ' ' + message).then(() => {
+                showNotification('Update sent to all users!', 'success');
+                if (typeof USE_FIREBASE !== 'undefined' && USE_FIREBASE && window.firebase) {
+                    firebase.database().ref('updates').once('value').then(snap => {
+                        const val = snap.val() || {};
+                        document.getElementById('totalUpdates').textContent = Object.keys(val).length;
+                    });
+                } else {
+                    const updates = JSON.parse(localStorage.getItem('updates')) || [];
+                    document.getElementById('totalUpdates').textContent = updates.length;
+                }
+                form.reset();
+            }).catch(err => {
+                console.error('Error sending update:', err);
+                showNotification('Failed to send update', 'error');
+            });
+        }
+
+        function adminLogout() {
+            localStorage.removeItem('adminPassword');
+            showNotification('Admin logout successful', 'success');
+            setTimeout(() => {
+                window.location.href = 'auth.html';
+            }, 1500);
+        }
+    </script>
+</body>
+</html>
+<!-- Firebase SDKs were moved earlier to ensure app initialization order -->
