@@ -3,6 +3,8 @@ document.addEventListener('DOMContentLoaded', () => {
     initializeTheme();
     initializeAuth();
     setupNotificationSystem();
+    // quick diagnostic log for Firebase status
+    if (typeof debugFirebase === 'function') debugFirebase();
 });
 
 // Toggle this to true after adding your Firebase config in `firebase-config.js`
@@ -167,24 +169,39 @@ function viewArticle(title, description, image) {
 
 // ========== ADMIN UTILITIES ==========
 function getUserCount() {
+    console.log('getUserCount: USE_FIREBASE=', USE_FIREBASE, 'firebase=', !!window.firebase);
     if (USE_FIREBASE && window.firebase) {
         return firebase.database().ref('users').once('value').then(snap => {
             const val = snap.val() || {};
-            return Object.keys(val).length;
+            const count = Object.keys(val).length;
+            console.log('getUserCount: remote count=', count);
+            return count;
+        }).catch(err => {
+            console.error('getUserCount: firebase error', err);
+            return 0;
         });
     }
     const users = JSON.parse(localStorage.getItem('users')) || [];
+    console.log('getUserCount: local count=', users.length);
     return Promise.resolve(users.length);
 }
 
 function getAllUsers() {
+    console.log('getAllUsers: USE_FIREBASE=', USE_FIREBASE, 'firebase=', !!window.firebase);
     if (USE_FIREBASE && window.firebase) {
         return firebase.database().ref('users').once('value').then(snap => {
             const val = snap.val() || {};
-            return Object.keys(val).map(k => val[k]);
+            const arr = Object.keys(val).map(k => val[k]);
+            console.log('getAllUsers: fetched', arr.length, 'users from firebase');
+            return arr;
+        }).catch(err => {
+            console.error('getAllUsers: firebase error', err);
+            return [];
         });
     }
-    return Promise.resolve(JSON.parse(localStorage.getItem('users')) || []);
+    const local = JSON.parse(localStorage.getItem('users')) || [];
+    console.log('getAllUsers: returning local users length=', local.length);
+    return Promise.resolve(local);
 }
 
 function addUpdate(message) {
@@ -193,8 +210,11 @@ function addUpdate(message) {
         message,
         timestamp: new Date().toLocaleString()
     };
+    console.log('addUpdate: USE_FIREBASE=', USE_FIREBASE);
     if (USE_FIREBASE && window.firebase) {
-        return firebase.database().ref('updates/' + newUpdate.id).set(newUpdate);
+        return firebase.database().ref('updates/' + newUpdate.id).set(newUpdate).then(() => {
+            console.log('addUpdate: saved update to firebase', newUpdate.id);
+        }).catch(err => { console.error('addUpdate: firebase error', err); throw err; });
     }
     const updates = JSON.parse(localStorage.getItem('updates')) || [];
     updates.push(newUpdate);
@@ -204,15 +224,36 @@ function addUpdate(message) {
 
 // Convenience wrappers used by pages
 function saveUser(user) {
+    console.log('saveUser: USE_FIREBASE=', USE_FIREBASE, 'user.id=', user.id);
     if (USE_FIREBASE && window.firebase) {
-        return firebase.database().ref('users/' + user.id).set(user);
+        return firebase.database().ref('users/' + user.id).set(user).then(() => {
+            console.log('saveUser: saved user to firebase', user.id);
+        }).catch(err => { console.error('saveUser: firebase error', err); throw err; });
     }
     const users = JSON.parse(localStorage.getItem('users')) || [];
     users.push(user);
     localStorage.setItem('users', JSON.stringify(users));
+    console.log('saveUser: saved user to localStorage', user.id);
     return Promise.resolve();
 }
 
 function fetchUsers() {
     return getAllUsers();
 }
+
+// Diagnostic helper you can call from the console: window.testFirebaseStatus()
+function debugFirebase() {
+    console.log('debugFirebase: USE_FIREBASE=', USE_FIREBASE);
+    console.log('debugFirebase: firebase loaded=', typeof firebase !== 'undefined');
+    if (typeof firebase !== 'undefined') {
+        console.log('debugFirebase: databaseURL=', firebase.app().options.databaseURL);
+        firebase.database().ref('users').once('value').then(snap => {
+            console.log('debugFirebase: users snapshot:', snap.val());
+        }).catch(err => { console.error('debugFirebase: error reading users', err); });
+        firebase.database().ref('updates').once('value').then(snap => {
+            console.log('debugFirebase: updates snapshot:', snap.val());
+        }).catch(err => { console.error('debugFirebase: error reading updates', err); });
+    }
+}
+
+window.testFirebaseStatus = debugFirebase;
